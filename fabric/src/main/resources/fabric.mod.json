@@ -12,6 +12,12 @@
         "adapter": "kotlin",
         "value": "com.nbp.apricorn_chamber.fabric.ApricornChamberFabric"
       }
+    ],
+    "client": [
+      {
+        "adapter": "kotlin",
+        "value": "com.nbp.apricorn_chamber.fabric.ApricornChamberFabricClient"
+      }
     ]
   },
   "depends": {

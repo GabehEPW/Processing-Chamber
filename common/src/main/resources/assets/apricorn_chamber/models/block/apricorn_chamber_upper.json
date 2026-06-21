@@ -1,0 +1,7 @@
+{
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "particle": "apricorn_chamber:block/texture_capsula_vidro"
+  },
+  "elements": []
+}

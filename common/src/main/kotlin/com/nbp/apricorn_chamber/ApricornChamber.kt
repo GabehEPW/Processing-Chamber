@@ -4,7 +4,7 @@ import com.cobblemon.mod.common.api.events.CobblemonEvents
 import net.minecraft.network.chat.Component
 import org.slf4j.LoggerFactory
 
-object CobblemonBands {
+object ApricornChamber {
     const val MOD_ID = "apricorn_chamber"
 
     private val logger = LoggerFactory.getLogger("ApricornChamber")

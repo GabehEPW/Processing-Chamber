@@ -5,6 +5,7 @@ import net.fabricmc.api.ModInitializer
 
 class ApricornChamberFabric : ModInitializer {
     override fun onInitialize() {
+        ApricornChamberFabricRegistries.init()
         ApricornChamber.init()
     }
 }

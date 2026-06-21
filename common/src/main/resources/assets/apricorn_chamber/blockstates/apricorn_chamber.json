@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "half=lower": {
+      "model": "apricorn_chamber:block/apricorn_chamber"
+    },
+    "half=upper": {
+      "model": "apricorn_chamber:block/apricorn_chamber_upper"
+    }
+  }
+}
