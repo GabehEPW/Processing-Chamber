@@ -1,11 +1,11 @@
-package com.nbp.cobblemon_bands.neoforge
+package com.nbp.apricorn_chamber.neoforge
 
-import com.nbp.cobblemon_bands.CobblemonBands
+import com.nbp.apricorn_chamber.ApricornChamber
 import net.neoforged.fml.common.Mod
 
-@Mod(CobblemonBands.MOD_ID)
-class CobblemonBandsNeoForge {
+@Mod(ApricornChamber.MOD_ID)
+class ApricornChamberNeoForge {
     init {
-        CobblemonBands.init()
+        ApricornChamber.init()
     }
 }

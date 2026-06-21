@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "id": "cobblemon_bands",
+  "id": "apricorn_chamber",
   "version": "${version}",
-  "name": "Cobblemon Bands",
+  "name": "Apricorn Chamber",
   "description": "Addon para Cobblemon usando Kotlin e Architectury.",
-  "authors": ["RapidMesck"],
+  "authors": ["GabehEPW"],
   "environment": "*",
   "entrypoints": {
     "main": [
       {
         "adapter": "kotlin",
-        "value": "com.nbp.cobblemon_bands.fabric.CobblemonBandsFabric"
+        "value": "com.nbp.apricorn_chamber.fabric.ApricornChamberFabric"
       }
     ]
   },

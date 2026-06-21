@@ -1,13 +1,13 @@
-package com.nbp.cobblemon_bands
+package com.nbp.apricorn_chamber
 
 import com.cobblemon.mod.common.api.events.CobblemonEvents
 import net.minecraft.network.chat.Component
 import org.slf4j.LoggerFactory
 
 object CobblemonBands {
-    const val MOD_ID = "cobblemon_bands"
+    const val MOD_ID = "apricorn_chamber"
 
-    private val logger = LoggerFactory.getLogger("CobblemonBands")
+    private val logger = LoggerFactory.getLogger("ApricornChamber")
 
     fun init() {
         logger.info("Meu Addon Cobblemon carregado!")

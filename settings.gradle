@@ -8,7 +8,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = "cobblemon_bands"
+rootProject.name = "apricorn_chamber"
 
 include "common"
 include "fabric"
