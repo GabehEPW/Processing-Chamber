@@ -1,0 +1,33 @@
+modLoader = "kotlinforforge"
+loaderVersion = "[5,)"
+license = "MIT"
+
+[[mods]]
+modId = "cobblemon_bands"
+version = "${version}"
+displayName = "Cobblemon Bands"
+authors = "RapidMesck"
+description = '''
+Addon para Cobblemon usando Kotlin, Fabric, NeoForge e Architectury.
+'''
+
+[[dependencies.cobblemon_bands]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.cobblemon_bands]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1]"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.cobblemon_bands]]
+modId = "cobblemon"
+type = "required"
+versionRange = "*"
+ordering = "AFTER"
+side = "BOTH"
