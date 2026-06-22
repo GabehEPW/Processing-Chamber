@@ -30,6 +30,8 @@ dependencies {
 
     modImplementation "com.cobblemon:fabric:${rootProject.cobblemon_version}"
 
+    modImplementation "teamreborn:energy:4.1.0"
+
     common(project(path: ":common", configuration: "namedElements")) {
         transitive = false
     }

@@ -34,6 +34,10 @@ subprojects {
             name = "Cobblemon"
             url = "https://maven.impactdev.net/repository/development/"
         }
+        maven {
+            name = "TeamReborn"
+            url = "https://maven.teamreborn.com/"
+        }
     }
 
     loom {
