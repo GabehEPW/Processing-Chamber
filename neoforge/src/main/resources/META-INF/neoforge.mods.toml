@@ -3,29 +3,29 @@ loaderVersion = "[5,)"
 license = "MIT"
 
 [[mods]]
-modId = "apricorn_chamber"
+modId = "processing_chamber"
 version = "${version}"
-displayName = "Apricorn Chamber"
+displayName = "Processing Chamber"
 authors = "GabehEPW"
 description = '''
 Addon para Cobblemon usando Kotlin, Fabric, NeoForge e Architectury.
 '''
 
-[[dependencies.apricorn_chamber]]
+[[dependencies.processing_chamber]]
 modId = "neoforge"
 type = "required"
 versionRange = "[21.1,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.apricorn_chamber]]
+[[dependencies.processing_chamber]]
 modId = "minecraft"
 type = "required"
 versionRange = "[1.21.1]"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.apricorn_chamber]]
+[[dependencies.processing_chamber]]
 modId = "cobblemon"
 type = "required"
 versionRange = "*"

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "apricorn_chamber",
+  "id": "processing_chamber",
   "version": "${version}",
-  "name": "Apricorn Chamber",
+  "name": "Processing Chamber",
   "description": "Addon para Cobblemon usando Kotlin e Architectury.",
   "authors": ["GabehEPW"],
   "environment": "*",
@@ -10,13 +10,13 @@
     "main": [
       {
         "adapter": "kotlin",
-        "value": "com.nbp.apricorn_chamber.fabric.ApricornChamberFabric"
+        "value": "com.nbp.processing_chamber.fabric.ProcessingChamberFabric"
       }
     ],
     "client": [
       {
         "adapter": "kotlin",
-        "value": "com.nbp.apricorn_chamber.fabric.ApricornChamberFabricClient"
+        "value": "com.nbp.processing_chamber.fabric.ProcessingChamberFabricClient"
       }
     ]
   },

@@ -8,7 +8,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = "apricorn_chamber"
+rootProject.name = "processing_chamber"
 
 include "common"
 include "fabric"
