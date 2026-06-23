@@ -17,15 +17,19 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 
-class CapsuleBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: BlockState) :
-    BlockEntity(type, pos, state), WorldlyContainer {
+class CapsuleBlockEntity(
+    type: BlockEntityType<*>,
+    pos: BlockPos,
+    state: BlockState,
+    val energyPerTick: Int = 50,
+    val processTime: Int = 100,
+    val outputAmount: Int = 1,
+) : BlockEntity(type, pos, state), WorldlyContainer {
+
+    val capacity: Int = energyPerTick * 4
+    val maxReceive: Int = energyPerTick * 4
 
     companion object {
-        const val ENERGY_PER_TICK = 50
-        const val CAPACITY = ENERGY_PER_TICK
-        const val MAX_RECEIVE = ENERGY_PER_TICK
-        const val PROCESS_TIME = 100
-
         private val ITEM_MAP = buildMap<String, String> {
             // Apricorn seeds → apricorns
             put("cobblemon:black_apricorn_seed", "cobblemon:black_apricorn")
@@ -130,7 +134,7 @@ class CapsuleBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: BlockSt
     private val items = NonNullList.withSize(2, ItemStack.EMPTY)
 
     fun receiveEnergy(maxReceive: Int, simulate: Boolean): Int {
-        val accepted = minOf(maxReceive, CAPACITY - energy, MAX_RECEIVE)
+        val accepted = minOf(maxReceive, capacity - energy, this.maxReceive)
         if (!simulate) {
             energy += accepted
             setChanged()
@@ -144,12 +148,12 @@ class CapsuleBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: BlockSt
         if (level == null || level!!.isClientSide) return
 
         if (canProcess()) {
-            if (energy >= ENERGY_PER_TICK) {
-                energy -= ENERGY_PER_TICK
+            if (energy >= energyPerTick) {
+                energy -= energyPerTick
                 processProgress++
                 setChanged()
 
-                if (processProgress >= PROCESS_TIME) {
+                if (processProgress >= processTime) {
                     process()
                     processProgress = 0
                     syncToClient()
@@ -191,7 +195,7 @@ class CapsuleBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: BlockSt
         val resultId = ITEM_MAP[inputId] ?: return ItemStack.EMPTY
         val item = BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(resultId))
         if (item == BuiltInRegistries.ITEM.get(ResourceLocation.tryParse("minecraft:air"))) return ItemStack.EMPTY
-        return ItemStack(item, 1)
+        return ItemStack(item, outputAmount)
     }
 
     // --- WorldlyContainer ---
@@ -256,6 +260,10 @@ class CapsuleBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: BlockSt
         processProgress = tag.getInt("progress")
         items.fill(ItemStack.EMPTY)
         ContainerHelper.loadAllItems(tag, items, registries)
+    }
+
+    fun loadData(tag: CompoundTag, registries: HolderLookup.Provider) {
+        loadAdditional(tag, registries)
     }
 
     override fun getUpdatePacket(): net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket {

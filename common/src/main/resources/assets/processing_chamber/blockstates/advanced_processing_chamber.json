@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "processing_chamber:block/advanced_processing_chamber"
+    },
+    "facing=east": {
+      "model": "processing_chamber:block/advanced_processing_chamber",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "processing_chamber:block/advanced_processing_chamber",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "processing_chamber:block/advanced_processing_chamber",
+      "y": 270
+    }
+  }
+}

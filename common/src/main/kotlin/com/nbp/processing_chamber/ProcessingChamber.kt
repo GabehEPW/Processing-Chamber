@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 object ProcessingChamber {
     const val MOD_ID = "processing_chamber"
 
-    private val logger = LoggerFactory.getLogger("ProcessingChamber")
+    val logger = LoggerFactory.getLogger("ProcessingChamber")
 
     fun init() {
         logger.info("Meu Addon Cobblemon carregado!")

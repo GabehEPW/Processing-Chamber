@@ -5,18 +5,15 @@ import com.nbp.processing_chamber.block.entity.CapsuleBlockEntity
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.world.Containers
-import net.minecraft.world.level.block.state.properties.DirectionProperty
-import net.minecraft.world.InteractionHand
-import net.minecraft.world.InteractionResult
 import net.minecraft.world.ItemInteractionResult
+import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.Level
-import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.level.block.BaseEntityBlock
 import net.minecraft.world.level.block.Block
-import net.minecraft.world.level.block.state.properties.BlockStateProperties
 import net.minecraft.world.level.block.Mirror
 import net.minecraft.world.level.block.RenderShape
 import net.minecraft.world.level.block.Rotation
@@ -25,15 +22,17 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityTicker
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.block.state.properties.BlockStateProperties
+import net.minecraft.world.level.block.state.properties.DirectionProperty
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.shapes.BooleanOp
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.Shapes
 import net.minecraft.world.phys.shapes.VoxelShape
 
-class ProcessingChamberBlock(properties: Properties) : BaseEntityBlock(properties) {
+class AdvancedProcessingChamberBlock(properties: Properties) : BaseEntityBlock(properties) {
     init {
-        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH))
+        registerDefaultState(defaultBlockState().setValue(FACING, net.minecraft.core.Direction.NORTH))
     }
 
     override fun getStateForPlacement(context: BlockPlaceContext): BlockState {
@@ -108,7 +107,7 @@ class ProcessingChamberBlock(properties: Properties) : BaseEntityBlock(propertie
         level: Level,
         pos: BlockPos,
         player: Player,
-        hand: InteractionHand,
+        hand: net.minecraft.world.InteractionHand,
         hit: BlockHitResult,
     ): ItemInteractionResult {
         val be = level.getBlockEntity(pos) as? CapsuleBlockEntity ?: return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
@@ -146,7 +145,7 @@ class ProcessingChamberBlock(properties: Properties) : BaseEntityBlock(propertie
 
     companion object {
         val FACING: DirectionProperty = BlockStateProperties.HORIZONTAL_FACING
-        val CODEC: MapCodec<ProcessingChamberBlock> = simpleCodec(::ProcessingChamberBlock)
+        val CODEC: MapCodec<AdvancedProcessingChamberBlock> = simpleCodec(::AdvancedProcessingChamberBlock)
         var BLOCK_ENTITY_TYPE: BlockEntityType<out BlockEntity>? = null
 
         private val BOXES = listOf(

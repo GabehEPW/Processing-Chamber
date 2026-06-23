@@ -1,4 +1,6 @@
 {
   "block.processing_chamber.processing_chamber": "Câmara de Processamento",
-  "itemGroup.processing_chamber": "Câmara de Processamento"
+  "block.processing_chamber.advanced_processing_chamber": "Câmara de Processamento Avançada",
+  "itemGroup.processing_chamber": "Câmara de Processamento",
+  "item.processing_chamber.upgrade_processing_chamber": "Upgrade de Câmara de Processamento"
 }

@@ -2,9 +2,12 @@ package com.nbp.processing_chamber.neoforge
 
 import com.nbp.processing_chamber.ProcessingChamber
 import com.nbp.processing_chamber.block.ProcessingChamberBlock
+import com.nbp.processing_chamber.block.AdvancedProcessingChamberBlock
 import com.nbp.processing_chamber.block.entity.CapsuleBlockEntity
 import com.nbp.processing_chamber.block.entity.ModBlockEntities
+import com.nbp.processing_chamber.config.ProcessingChamberConfig
 import com.nbp.processing_chamber.registry.ProcessingChamberBlocks
+import com.nbp.processing_chamber.registry.ProcessingChamberItems
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.BlockItem
@@ -38,7 +41,11 @@ object ProcessingChamberNeoForgeRegistries {
             CreativeModeTab.Builder(CreativeModeTab.Row.TOP, 0)
                 .title(Component.translatable("itemGroup.processing_chamber"))
                 .icon { ItemStack(PROCESSING_CHAMBER_ITEM.get()) }
-                .displayItems { params, output -> output.accept(PROCESSING_CHAMBER_ITEM.get()) }
+                .displayItems { params, output ->
+                    output.accept(PROCESSING_CHAMBER_ITEM.get())
+                    output.accept(ADVANCED_PROCESSING_CHAMBER_ITEM.get())
+                    output.accept(UPGRADE_PROCESSING_CHAMBER.get())
+                }
                 .build()
         })
 
@@ -52,14 +59,46 @@ object ProcessingChamberNeoForgeRegistries {
             BlockItem(PROCESSING_CHAMBER.get(), Item.Properties())
         })
 
+    val ADVANCED_PROCESSING_CHAMBER: DeferredHolder<Block, Block> =
+        BLOCKS.register(ProcessingChamberBlocks.ADVANCED_PROCESSING_CHAMBER_NAME, Supplier {
+            ProcessingChamberBlocks.createAdvancedProcessingChamberBlock()
+        })
+
+    val ADVANCED_PROCESSING_CHAMBER_ITEM: DeferredHolder<Item, BlockItem> =
+        ITEMS.register(ProcessingChamberBlocks.ADVANCED_PROCESSING_CHAMBER_NAME, Supplier {
+            BlockItem(ADVANCED_PROCESSING_CHAMBER.get(), Item.Properties())
+        })
+
+    val UPGRADE_PROCESSING_CHAMBER: DeferredHolder<Item, Item> =
+        ITEMS.register(ProcessingChamberItems.UPGRADE_PROCESSING_CHAMBER_NAME, Supplier {
+            ProcessingChamberItems.createUpgradeItem()
+        })
+
     private val CAPSULE_BE: DeferredHolder<BlockEntityType<*>, BlockEntityType<CapsuleBlockEntity>> =
         BLOCK_ENTITIES.register(ProcessingChamberBlocks.PROCESSING_CHAMBER_NAME, Supplier {
+            val c = ProcessingChamberConfig.normal
             val type = BlockEntityType.Builder.of(
-                { pos, state -> CapsuleBlockEntity(ModBlockEntities.CAPSULE_BLOCK_ENTITY, pos, state) },
+                { pos, state ->
+                    CapsuleBlockEntity(ModBlockEntities.CAPSULE_BLOCK_ENTITY, pos, state, c.energyPerTick, c.processTime, c.outputAmount)
+                },
                 PROCESSING_CHAMBER.get(),
             ).build(null)
             ModBlockEntities.CAPSULE_BLOCK_ENTITY = type
             ProcessingChamberBlock.BLOCK_ENTITY_TYPE = type
+            type
+        })
+
+    private val ADVANCED_CAPSULE_BE: DeferredHolder<BlockEntityType<*>, BlockEntityType<CapsuleBlockEntity>> =
+        BLOCK_ENTITIES.register(ProcessingChamberBlocks.ADVANCED_PROCESSING_CHAMBER_NAME, Supplier {
+            val c = ProcessingChamberConfig.advanced
+            val type = BlockEntityType.Builder.of(
+                { pos, state ->
+                    CapsuleBlockEntity(ModBlockEntities.ADVANCED_CAPSULE_BLOCK_ENTITY, pos, state, c.energyPerTick, c.processTime, c.outputAmount)
+                },
+                ADVANCED_PROCESSING_CHAMBER.get(),
+            ).build(null)
+            ModBlockEntities.ADVANCED_CAPSULE_BLOCK_ENTITY = type
+            AdvancedProcessingChamberBlock.BLOCK_ENTITY_TYPE = type
             type
         })
 
@@ -81,7 +120,25 @@ object ProcessingChamberNeoForgeRegistries {
                             be.receiveEnergy(maxReceive, simulate)
                         override fun extractEnergy(maxExtract: Int, simulate: Boolean): Int = 0
                         override fun getEnergyStored(): Int = be.energy
-                        override fun getMaxEnergyStored(): Int = CapsuleBlockEntity.CAPACITY
+                        override fun getMaxEnergyStored(): Int = be.capacity
+                        override fun canExtract(): Boolean = false
+                        override fun canReceive(): Boolean = true
+                    }
+                },
+            )
+
+            event.registerBlockEntity(
+                net.neoforged.neoforge.capabilities.Capabilities.EnergyStorage.BLOCK,
+                ADVANCED_CAPSULE_BE.get(),
+                { be, side ->
+                    val back = be.blockState.getValue(AdvancedProcessingChamberBlock.FACING).opposite
+                    if (side != back) null
+                    else object : IEnergyStorage {
+                        override fun receiveEnergy(maxReceive: Int, simulate: Boolean): Int =
+                            be.receiveEnergy(maxReceive, simulate)
+                        override fun extractEnergy(maxExtract: Int, simulate: Boolean): Int = 0
+                        override fun getEnergyStored(): Int = be.energy
+                        override fun getMaxEnergyStored(): Int = be.capacity
                         override fun canExtract(): Boolean = false
                         override fun canReceive(): Boolean = true
                     }
@@ -91,6 +148,14 @@ object ProcessingChamberNeoForgeRegistries {
             event.registerBlockEntity(
                 net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK,
                 CAPSULE_BE.get(),
+                { be, side ->
+                    net.neoforged.neoforge.items.wrapper.SidedInvWrapper(be, side)
+                },
+            )
+
+            event.registerBlockEntity(
+                net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK,
+                ADVANCED_CAPSULE_BE.get(),
                 { be, side ->
                     net.neoforged.neoforge.items.wrapper.SidedInvWrapper(be, side)
                 },

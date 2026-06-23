@@ -20,11 +20,16 @@ object ProcessingChamberNeoForgeClient {
                 ProcessingChamberNeoForgeRegistries.PROCESSING_CHAMBER.get(),
                 RenderType.translucent(),
             )
+            ItemBlockRenderTypes.setRenderLayer(
+                ProcessingChamberNeoForgeRegistries.ADVANCED_PROCESSING_CHAMBER.get(),
+                RenderType.translucent(),
+            )
         }
     }
 
     @SubscribeEvent
     fun onRegisterRenderers(event: EntityRenderersEvent.RegisterRenderers) {
         event.registerBlockEntityRenderer(ModBlockEntities.CAPSULE_BLOCK_ENTITY, ::CapsuleBlockEntityRenderer)
+        event.registerBlockEntityRenderer(ModBlockEntities.ADVANCED_CAPSULE_BLOCK_ENTITY, ::CapsuleBlockEntityRenderer)
     }
 }

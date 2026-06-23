@@ -1,4 +1,6 @@
 {
   "block.processing_chamber.processing_chamber": "Processing Chamber",
-  "itemGroup.processing_chamber": "Processing Chamber"
+  "block.processing_chamber.advanced_processing_chamber": "Processing Chamber Advanced",
+  "itemGroup.processing_chamber": "Processing Chamber",
+  "item.processing_chamber.upgrade_processing_chamber": "Processing Chamber Upgrade"
 }
