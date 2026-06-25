@@ -1,4 +1,4 @@
-![Banner]([https://i.imgur.com/IXpcGvZ.png](https://imgur.com/a/e2bkDaB))
+![Banner](https://imgur.com/a/e2bkDaB)
 
 # Processing Chamber
 
