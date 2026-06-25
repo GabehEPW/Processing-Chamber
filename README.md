@@ -1,177 +1,353 @@
 ![Banner](https://i.imgur.com/IXpcGvZ.png)
-# Resource Processor
 
-**Resource Processor** is a **Cobblemon** addon that adds energy-powered machines to process apricorn seeds, berries, and mint seeds into their mature forms — fully automatable with hoppers and item pipes.
+# Processing Chamber
+
+**Processing Chamber** is a **Cobblemon addon** that adds FE-powered machines for automating the production of **Apricorns**, **Berries**, and **Mint Leaves**.
+
+Build compact processing setups, power your machines with FE, install upgrade cards, and automate resource production using hoppers, item pipes, and energy networks.
 
 ---
 
-## 🔧 Content
+## ✨ Features
 
-### Blocks
+* FE-powered processing machines
+* Apricorn Seed automation
+* Berry multiplication
+* Mint Leaf production
+* Upgrade cards with unique effects
+* Advanced machine tier
+* Custom GUI
+* Energy and progress display
+* Hopper and pipe automation support
+* Configurable machine values
+* English and Brazilian Portuguese translations
 
-| Block | Description |
-|---|---|
-| **Resource Processor** | Basic machine — processes 1 item per craft, consumes 50 FE/t, takes 100 ticks (5 seconds) |
-| **Advanced Resource Processor** | Advanced machine — processes **3 items per craft**, consumes 100 FE/t, takes only 60 ticks (3 seconds) |
+---
 
-### Item
+## 🔧 Blocks
 
-| Item | Description |
-|---|---|
-| **Processor Upgrade Kit** | Right-click a basic chamber to perform an **instant in-place upgrade** to the advanced version, preserving all progress, energy, and stored items |
-| **Overclock Card** | Upgrade: decreases processing time, but increases FE/t consumption |
-| **Fortune Card** | Upgrade: adds a chance to generate +1 output item, but increases FE/t consumption |
-| **Optimization Card** | Upgrade: reduces FE/t consumption without changing processing time |
+| Block                           | Description                                                                                                                                              |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Resource Processor**          | Basic machine for processing Cobblemon resources. Stores **5,000 FE**, consumes **15 FE/t**, and accepts **1 upgrade card**.                             |
+| **Advanced Resource Processor** | Advanced machine with higher energy capacity, faster processing, and up to **3 different upgrade cards**. Stores **10,000 FE** and consumes **45 FE/t**. |
 
-### Future Machine Upgrades
+---
 
-These items are registered now, but do not affect machines yet.
+## 🧩 Items
 
-| Upgrade | Future function |
-|---|---|
-| Overclock Card | Decreases processing time and increases FE/t consumption |
-| Fortune Card | Adds a chance to generate +1 output item and increases FE/t consumption |
-| Optimization Card | Reduces FE/t consumption and does not change processing time |
+| Item                      | Description                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Processor Upgrade Kit** | Upgrades a Resource Processor into an Advanced Resource Processor while preserving energy, progress, items, and upgrades. |
+| **Overclock Card**        | Reduces processing time, but increases FE usage.                                                                          |
+| **Optimized Card**        | Reduces FE consumption without changing processing time.                                                                  |
+| **Fortune Card**          | Adds a chance to generate bonus output, but increases FE usage.                                                           |
 
 ---
 
 ## ⚙️ How It Works
 
-1. Place the **Resource Processor** in the world
-2. Supply energy through the **back face** (opposite to the direction the machine is facing)
-3. Insert seeds or berries manually (right-click) or via **hopper from the top**
-4. The machine processes automatically and deposits the result in the output slot
-5. Collect the result manually or via **hopper from the bottom**
+1. Place a **Resource Processor** or **Advanced Resource Processor** in the world.
+2. Supply FE energy through the **back face** of the machine.
+3. Insert a valid Cobblemon item into the input slot.
+4. The machine processes automatically while it has energy and output space.
+5. Generated items are stored in the **9 output slots**.
+6. Outputs can be collected manually or extracted through automation.
 
-### In-Place Upgrade
-Hold the **Processor Upgrade Kit** and right-click the basic chamber to instantly convert it to the advanced version. All energy, progress, and items are preserved.
+The input item is **not consumed every cycle**.
+
+It stays inside the machine and continues producing resources until:
+
+* The output slots are full
+* The machine runs out of energy
+* The player removes the input item
+
+If the machine runs out of energy, the processing progress is paused instead of being reset.
 
 ---
 
-## 📋 Supported Recipes (77 total)
+## ⬆️ Processor Upgrade Kit
 
-### Apricorn Seeds → Apricorns (7)
-| Input | Output |
-|---|---|
-| Black Apricorn Seed | Black Apricorn |
-| Blue Apricorn Seed | Blue Apricorn |
-| Green Apricorn Seed | Green Apricorn |
-| Pink Apricorn Seed | Pink Apricorn |
-| Red Apricorn Seed | Red Apricorn |
-| White Apricorn Seed | White Apricorn |
+The **Processor Upgrade Kit** instantly converts a **Resource Processor** into an **Advanced Resource Processor**.
+
+The upgrade preserves:
+
+* Stored energy
+* Processing progress
+* Input item
+* Output items
+* Upgrade cards
+
+---
+
+## 🃏 Upgrade Cards
+
+Upgrade cards can only be inserted into upgrade slots.
+
+### Upgrade Rules
+
+* **Resource Processor** accepts **1 upgrade card**
+* **Advanced Resource Processor** accepts up to **3 different upgrade cards**
+* Duplicate upgrade cards are not allowed in the same machine
+* Each upgrade slot holds only **1 card**
+
+---
+
+### Overclock Card
+
+Increases machine speed.
+
+**Effects:**
+
+* Reduces processing time by **20%**
+* Increases FE consumption by **40%**
+
+---
+
+### Optimized Card
+
+Improves energy efficiency.
+
+**Effects:**
+
+* Reduces FE consumption by **30%**
+* Does not change processing time
+
+---
+
+### Fortune Card
+
+Adds a chance to generate bonus output.
+
+**Effects:**
+
+* **+15%** bonus output chance in the Resource Processor
+* **+25%** bonus output chance in the Advanced Resource Processor
+* Increases FE consumption by **20%**
+
+---
+
+## 📋 Supported Processing
+
+### Apricorn Seeds → Apricorns
+
+| Input                | Output          |
+| -------------------- | --------------- |
+| Black Apricorn Seed  | Black Apricorn  |
+| Blue Apricorn Seed   | Blue Apricorn   |
+| Green Apricorn Seed  | Green Apricorn  |
+| Pink Apricorn Seed   | Pink Apricorn   |
+| Red Apricorn Seed    | Red Apricorn    |
+| White Apricorn Seed  | White Apricorn  |
 | Yellow Apricorn Seed | Yellow Apricorn |
 
-### Berries → Same Berry (64)
-All Cobblemon berries are processed and output **one mature berry** (same type). Perfect for automated berry multiplication!
+---
 
-Full list: aguav, apicot, aspear, babiri, belue, bluk, charti, cheri, chesto, chilan, chople, coba, colbur, cornn, custap, durin, eggant, enigma, figy, ganlon, grepa, haban, hondew, hopo, iapapa, jaboca, kasib, kebia, kee, kelpsy, lansat, leppa, liechi, lum, lure, mago, magost, maranga, micle, nanab, nomel, occa, oran, pamtre, passho, payapa, pecha, persim, petaya, pinap, pomeg, qualot, rabuta, rawst, razz, rindo, roseli, rowap, salac, shuca, sitrus, spelon, starf, tamato, tanga, touga, wacan, watmel, wepear, wiki, yache
+### Berries → Same Berry
 
-### Mint Seeds → Mint Leaves (6)
-| Input | Output |
-|---|---|
-| Red Mint Seeds | Red Mint Leaf |
-| Blue Mint Seeds | Blue Mint Leaf |
+Supported Cobblemon berries can be processed into the same berry type, making berry multiplication easy to automate.
+
+Example:
+
+| Input        | Output       |
+| ------------ | ------------ |
+| Oran Berry   | Oran Berry   |
+| Sitrus Berry | Sitrus Berry |
+| Pecha Berry  | Pecha Berry  |
+
+---
+
+### Mint Seeds → Mint Leaves
+
+| Input            | Output          |
+| ---------------- | --------------- |
+| Red Mint Seeds   | Red Mint Leaf   |
+| Blue Mint Seeds  | Blue Mint Leaf  |
 | Green Mint Seeds | Green Mint Leaf |
-| Pink Mint Seeds | Pink Mint Leaf |
+| Pink Mint Seeds  | Pink Mint Leaf  |
 | White Mint Seeds | White Mint Leaf |
-| Cyan Mint Seeds | Cyan Mint Leaf |
+| Cyan Mint Seeds  | Cyan Mint Leaf  |
 
 ---
 
 ## ⚡ Energy
 
-The machine runs on **Forge Energy (FE)**.
+Processing Chamber machines use **FE energy**.
 
-| Parameter | Resource Processor | Advanced Resource Processor |
-|---|---|---|
-| Consumption per tick | 50 FE | 100 FE |
-| Processing time | 100 ticks (5s) | 60 ticks (3s) |
-| Items produced per craft | 1 | 3 |
-| Internal buffer | 200 FE | 400 FE |
-| Max receive rate | 200 FE/t | 400 FE/t |
+| Parameter            | Resource Processor | Advanced Resource Processor |
+| -------------------- | -----------------: | --------------------------: |
+| Energy storage       |           5,000 FE |                   10,000 FE |
+| Base FE consumption  |            15 FE/t |                     45 FE/t |
+| Base processing time |  1,800 ticks / 90s |             900 ticks / 45s |
+| Output slots         |                  9 |                           9 |
+| Upgrade slots        |                  1 |                           3 |
 
-Energy input is **exclusively through the back face** (opposite to the facing direction).
+Energy is inserted through the **back face** of the machine.
+
+Stored energy is preserved when the machine is broken and placed again.
 
 ---
 
 ## 🔨 Crafting Recipes
 
 ### Resource Processor
-```
+
+```txt
 I I I
 G R G
 I I I
 ```
-- I: Iron Ingot
-- G: Glass
-- R: Redstone
 
-### Processor Upgrade Kit
+```txt
+I: Iron Ingot
+G: Glass
+R: Redstone
 ```
-O R O
-Q O Q
-O R O
-```
-- O: Obsidian
-- R: Redstone
-- Q: Quartz
+
+---
 
 ### Advanced Resource Processor
-```
+
+```txt
 O R O
 Q P Q
 O R O
 ```
-- O: Obsidian
-- R: Redstone
-- Q: Quartz
-- P: Resource Processor
+
+```txt
+O: Obsidian
+R: Redstone
+Q: Quartz
+P: Resource Processor
+```
+
+---
+
+### Processor Upgrade Kit
+
+```txt
+O R O
+Q O Q
+O R O
+```
+
+```txt
+O: Obsidian
+R: Redstone
+Q: Quartz
+```
+
+---
+
+### Overclock Card
+
+```txt
+R S R
+G C G
+R S R
+```
+
+```txt
+R: Redstone
+S: Sugar
+G: Gold Ingot
+C: Copper Ingot
+```
+
+---
+
+### Optimized Card
+
+```txt
+C L C
+R G R
+C L C
+```
+
+```txt
+C: Copper Ingot
+L: Lapis Lazuli
+R: Redstone
+G: Glass Pane
+```
+
+---
+
+### Fortune Card
+
+```txt
+A Y A
+N R N
+A Y A
+```
+
+```txt
+A: Any Cobblemon Apricorn
+Y: Any Cobblemon Berry
+N: Gold Nugget
+R: Redstone
+```
 
 ---
 
 ## ⬇️ Automation
 
-- **Item input**: accepted via hopper on the **top face** (input slot), valid items only
-- **Item extraction**: pulled via hopper on the **bottom face** (output slot)
-- **Energy**: accepted from any FE generator through the **back face**
+Processing Chamber machines support automation with hoppers, item pipes, and energy networks.
+
+| Side   | Function                        |
+| ------ | ------------------------------- |
+| Top    | Inserts valid input items       |
+| Bottom | Extracts generated output items |
+| Back   | Accepts FE energy               |
+
+Machines can also transfer outputs downward into another processor placed below them.
+
+This allows players to build compact vertical processing arrays.
 
 ---
 
-## 🎨 Visual
+## 🎨 Visuals
 
-Each block has a **detailed 3D model** with a glass window showing the interior. The item being processed **floats and rotates** inside the machine.
+The machines include:
 
-Energy bar textures show 6 visual levels (0 to 5) for easy monitoring in the GUI.
+* Detailed 3D block models
+* Custom GUI
+* Animated internal item rendering
+* Visual energy bar
+* Visual progress bar
+* Colored machine and upgrade names
+* Tooltips showing useful machine information
 
----
+Tooltips may display:
 
-## 🌐 Languages
-
-- English
-- Português (Brasil)
-
----
-
-## 📦 Dependencies
-
-- **Minecraft 1.21.1**
-- **Cobblemon 1.7.0+1.21.1**
-
-### Fabric
-- Fabric Loader ≥0.17.0
-- Fabric API 0.116.6+
-- Fabric Language Kotlin 1.13.3+
-- TeamReborn Energy 4.1.0+
-
-### NeoForge
-- NeoForge ≥21.1
-- Kotlin for Forge 5.9.0+
+* Stored energy
+* Processing progress
+* FE/t usage
+* Fortune bonus chance
+* Installed upgrade effects
 
 ---
 
 ## ⚙️ Configuration
 
-Auto-generated file at `config/processing_chamber.json`:
+The mod creates a configuration file at:
+
+```txt
+config/processing_chamber.json
+```
+
+Server owners and players can configure:
+
+* Max energy storage
+* FE consumption per tick
+* Processing time
+* Output amount
+* Upgrade slot count
+* Minimum processing time
+* Fortune bonus chance
+* Upgrade card multipliers
+* Minimum FE/t usage
+
+Example configuration:
 
 ```json
 {
@@ -205,6 +381,38 @@ Auto-generated file at `config/processing_chamber.json`:
 
 ---
 
+## 🌐 Languages
+
+Processing Chamber currently supports:
+
+* English
+* Português do Brasil
+
+---
+
+## 📦 Dependencies
+
+### Common
+
+* Minecraft **1.21.1**
+* Cobblemon
+
+### Fabric
+
+* Fabric Loader
+* Fabric API
+* Fabric Language Kotlin
+* TeamReborn Energy
+
+### NeoForge
+
+* NeoForge
+* Kotlin for Forge
+
+---
+
 ## 📜 License
 
-MIT License — Copyright (c) 2026 GabehEPW
+This project is licensed under the **MIT License**.
+
+Copyright © 2026 **GabehEPW**
