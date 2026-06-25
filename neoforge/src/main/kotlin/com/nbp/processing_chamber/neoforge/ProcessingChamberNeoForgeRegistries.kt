@@ -6,10 +6,14 @@ import com.nbp.processing_chamber.block.AdvancedProcessingChamberBlock
 import com.nbp.processing_chamber.block.entity.CapsuleBlockEntity
 import com.nbp.processing_chamber.block.entity.ModBlockEntities
 import com.nbp.processing_chamber.config.ProcessingChamberConfig
+import com.nbp.processing_chamber.menu.ModMenus
+import com.nbp.processing_chamber.menu.ProcessingChamberMenu
 import com.nbp.processing_chamber.registry.ProcessingChamberBlocks
 import com.nbp.processing_chamber.registry.ProcessingChamberItems
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
+import net.minecraft.world.flag.FeatureFlags
+import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.CreativeModeTab
 import net.minecraft.world.item.Item
@@ -33,6 +37,9 @@ object ProcessingChamberNeoForgeRegistries {
     private val BLOCK_ENTITIES: DeferredRegister<BlockEntityType<*>> =
         DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, ProcessingChamber.MOD_ID)
 
+    private val MENUS: DeferredRegister<MenuType<*>> =
+        DeferredRegister.create(Registries.MENU, ProcessingChamber.MOD_ID)
+
     private val CREATIVE_TABS: DeferredRegister<CreativeModeTab> =
         DeferredRegister.create(Registries.CREATIVE_MODE_TAB, ProcessingChamber.MOD_ID)
 
@@ -44,7 +51,10 @@ object ProcessingChamberNeoForgeRegistries {
                 .displayItems { params, output ->
                     output.accept(PROCESSING_CHAMBER_ITEM.get())
                     output.accept(ADVANCED_PROCESSING_CHAMBER_ITEM.get())
-                    output.accept(UPGRADE_PROCESSING_CHAMBER.get())
+                    output.accept(PROCESSOR_UPGRADE_KIT.get())
+                    output.accept(OVERCLOCK_CARD.get())
+                    output.accept(FORTUNE_CARD.get())
+                    output.accept(OPTIMIZATION_CARD.get())
                 }
                 .build()
         })
@@ -56,7 +66,7 @@ object ProcessingChamberNeoForgeRegistries {
 
     val PROCESSING_CHAMBER_ITEM: DeferredHolder<Item, BlockItem> =
         ITEMS.register(ProcessingChamberBlocks.PROCESSING_CHAMBER_NAME, Supplier {
-            BlockItem(PROCESSING_CHAMBER.get(), Item.Properties())
+            ProcessingChamberBlocks.createProcessingChamberItem(PROCESSING_CHAMBER.get())
         })
 
     val ADVANCED_PROCESSING_CHAMBER: DeferredHolder<Block, Block> =
@@ -66,12 +76,37 @@ object ProcessingChamberNeoForgeRegistries {
 
     val ADVANCED_PROCESSING_CHAMBER_ITEM: DeferredHolder<Item, BlockItem> =
         ITEMS.register(ProcessingChamberBlocks.ADVANCED_PROCESSING_CHAMBER_NAME, Supplier {
-            BlockItem(ADVANCED_PROCESSING_CHAMBER.get(), Item.Properties())
+            ProcessingChamberBlocks.createAdvancedProcessingChamberItem(ADVANCED_PROCESSING_CHAMBER.get())
         })
 
-    val UPGRADE_PROCESSING_CHAMBER: DeferredHolder<Item, Item> =
-        ITEMS.register(ProcessingChamberItems.UPGRADE_PROCESSING_CHAMBER_NAME, Supplier {
-            ProcessingChamberItems.createUpgradeItem()
+    val PROCESSOR_UPGRADE_KIT: DeferredHolder<Item, Item> =
+        ITEMS.register(ProcessingChamberItems.PROCESSOR_UPGRADE_KIT_NAME, Supplier {
+            ProcessingChamberItems.createProcessorUpgradeKitItem()
+        })
+
+    val OVERCLOCK_CARD: DeferredHolder<Item, Item> =
+        ITEMS.register(ProcessingChamberItems.OVERCLOCK_CARD_NAME, Supplier {
+            ProcessingChamberItems.createTooltipItem(ProcessingChamberItems.OVERCLOCK_CARD_NAME)
+        })
+
+    val FORTUNE_CARD: DeferredHolder<Item, Item> =
+        ITEMS.register(ProcessingChamberItems.FORTUNE_CARD_NAME, Supplier {
+            ProcessingChamberItems.createTooltipItem(ProcessingChamberItems.FORTUNE_CARD_NAME)
+        })
+
+    val OPTIMIZATION_CARD: DeferredHolder<Item, Item> =
+        ITEMS.register(ProcessingChamberItems.OPTIMIZATION_CARD_NAME, Supplier {
+            ProcessingChamberItems.createTooltipItem(ProcessingChamberItems.OPTIMIZATION_CARD_NAME)
+        })
+
+    val PROCESSING_CHAMBER_MENU: DeferredHolder<MenuType<*>, MenuType<ProcessingChamberMenu>> =
+        MENUS.register(ProcessingChamberBlocks.PROCESSING_CHAMBER_NAME, Supplier {
+            val type = MenuType(
+                { containerId, inventory -> ProcessingChamberMenu(containerId, inventory) },
+                FeatureFlags.DEFAULT_FLAGS,
+            )
+            ModMenus.PROCESSING_CHAMBER_MENU = type
+            type
         })
 
     private val CAPSULE_BE: DeferredHolder<BlockEntityType<*>, BlockEntityType<CapsuleBlockEntity>> =
@@ -79,7 +114,18 @@ object ProcessingChamberNeoForgeRegistries {
             val c = ProcessingChamberConfig.normal
             val type = BlockEntityType.Builder.of(
                 { pos, state ->
-                    CapsuleBlockEntity(ModBlockEntities.CAPSULE_BLOCK_ENTITY, pos, state, c.energyPerTick, c.processTime, c.outputAmount)
+                    CapsuleBlockEntity(
+                        ModBlockEntities.CAPSULE_BLOCK_ENTITY,
+                        pos,
+                        state,
+                        c.maxEnergy,
+                        c.energyPerTick,
+                        c.processTime,
+                        c.outputAmount,
+                        c.upgradeSlots,
+                        c.minProcessTime,
+                        c.fortuneBonusChance,
+                    )
                 },
                 PROCESSING_CHAMBER.get(),
             ).build(null)
@@ -93,7 +139,18 @@ object ProcessingChamberNeoForgeRegistries {
             val c = ProcessingChamberConfig.advanced
             val type = BlockEntityType.Builder.of(
                 { pos, state ->
-                    CapsuleBlockEntity(ModBlockEntities.ADVANCED_CAPSULE_BLOCK_ENTITY, pos, state, c.energyPerTick, c.processTime, c.outputAmount)
+                    CapsuleBlockEntity(
+                        ModBlockEntities.ADVANCED_CAPSULE_BLOCK_ENTITY,
+                        pos,
+                        state,
+                        c.maxEnergy,
+                        c.energyPerTick,
+                        c.processTime,
+                        c.outputAmount,
+                        c.upgradeSlots,
+                        c.minProcessTime,
+                        c.fortuneBonusChance,
+                    )
                 },
                 ADVANCED_PROCESSING_CHAMBER.get(),
             ).build(null)
@@ -106,6 +163,7 @@ object ProcessingChamberNeoForgeRegistries {
         BLOCKS.register(modEventBus)
         ITEMS.register(modEventBus)
         BLOCK_ENTITIES.register(modEventBus)
+        MENUS.register(modEventBus)
         CREATIVE_TABS.register(modEventBus)
 
         modEventBus.addListener<RegisterCapabilitiesEvent> { event ->

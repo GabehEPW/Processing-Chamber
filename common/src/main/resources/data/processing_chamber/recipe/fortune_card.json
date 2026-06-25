@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "AYA",
+    "NRN",
+    "AYA"
+  ],
+  "key": {
+    "A": {
+      "tag": "cobblemon:apricorns"
+    },
+    "Y": {
+      "tag": "cobblemon:berries"
+    },
+    "N": {
+      "item": "minecraft:gold_nugget"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "result": {
+    "id": "processing_chamber:fortune_card",
+    "count": 1
+  }
+}

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "processing_chamber",
   "version": "${version}",
-  "name": "Processing Chamber",
+  "name": "Resource Processor",
   "description": "Addon para Cobblemon usando Kotlin e Architectury.",
   "authors": ["GabehEPW"],
   "environment": "*",

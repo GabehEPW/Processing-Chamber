@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "processing_chamber:processing_chamber"
+          "name": "processing_chamber:advanced_resource_processor"
         }
       ],
       "conditions": [

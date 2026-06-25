@@ -6,6 +6,8 @@ import com.nbp.processing_chamber.block.AdvancedProcessingChamberBlock
 import com.nbp.processing_chamber.block.entity.CapsuleBlockEntity
 import com.nbp.processing_chamber.block.entity.ModBlockEntities
 import com.nbp.processing_chamber.config.ProcessingChamberConfig
+import com.nbp.processing_chamber.menu.ModMenus
+import com.nbp.processing_chamber.menu.ProcessingChamberMenu
 import com.nbp.processing_chamber.registry.ProcessingChamberBlocks
 import com.nbp.processing_chamber.registry.ProcessingChamberItems
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext
@@ -13,6 +15,8 @@ import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.flag.FeatureFlags
+import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.item.CreativeModeTab
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.entity.BlockEntityType
@@ -42,13 +46,37 @@ object ProcessingChamberFabricRegistries {
     val ADVANCED_PROCESSING_CHAMBER_ITEM = Registry.register(
         BuiltInRegistries.ITEM,
         ProcessingChamberBlocks.ADVANCED_PROCESSING_CHAMBER_ID,
-        ProcessingChamberBlocks.createProcessingChamberItem(ADVANCED_PROCESSING_CHAMBER),
+        ProcessingChamberBlocks.createAdvancedProcessingChamberItem(ADVANCED_PROCESSING_CHAMBER),
     )
 
-    val UPGRADE_PROCESSING_CHAMBER = Registry.register(
+    val PROCESSOR_UPGRADE_KIT = Registry.register(
         BuiltInRegistries.ITEM,
-        ProcessingChamberItems.UPGRADE_PROCESSING_CHAMBER_ID,
-        ProcessingChamberItems.createUpgradeItem(),
+        ProcessingChamberItems.PROCESSOR_UPGRADE_KIT_ID,
+        ProcessingChamberItems.createProcessorUpgradeKitItem(),
+    )
+
+    val OVERCLOCK_CARD = Registry.register(
+        BuiltInRegistries.ITEM,
+        ProcessingChamberItems.OVERCLOCK_CARD_ID,
+        ProcessingChamberItems.createTooltipItem(ProcessingChamberItems.OVERCLOCK_CARD_NAME),
+    )
+
+    val FORTUNE_CARD = Registry.register(
+        BuiltInRegistries.ITEM,
+        ProcessingChamberItems.FORTUNE_CARD_ID,
+        ProcessingChamberItems.createTooltipItem(ProcessingChamberItems.FORTUNE_CARD_NAME),
+    )
+
+    val OPTIMIZATION_CARD = Registry.register(
+        BuiltInRegistries.ITEM,
+        ProcessingChamberItems.OPTIMIZATION_CARD_ID,
+        ProcessingChamberItems.createTooltipItem(ProcessingChamberItems.OPTIMIZATION_CARD_NAME),
+    )
+
+    val PROCESSING_CHAMBER_MENU: MenuType<ProcessingChamberMenu> = Registry.register(
+        BuiltInRegistries.MENU,
+        ProcessingChamberBlocks.PROCESSING_CHAMBER_ID,
+        MenuType({ containerId, inventory -> ProcessingChamberMenu(containerId, inventory) }, FeatureFlags.DEFAULT_FLAGS),
     )
 
     val CREATIVE_TAB = Registry.register(
@@ -60,19 +88,35 @@ object ProcessingChamberFabricRegistries {
             .displayItems { params, output ->
                 output.accept(PROCESSING_CHAMBER_ITEM)
                 output.accept(ADVANCED_PROCESSING_CHAMBER_ITEM)
-                output.accept(UPGRADE_PROCESSING_CHAMBER)
+                output.accept(PROCESSOR_UPGRADE_KIT)
+                output.accept(OVERCLOCK_CARD)
+                output.accept(FORTUNE_CARD)
+                output.accept(OPTIMIZATION_CARD)
             }
             .build(),
     )
 
     fun init() {
+        ModMenus.PROCESSING_CHAMBER_MENU = PROCESSING_CHAMBER_MENU
+
         val capsuleBlockEntityType = Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE,
             ProcessingChamberBlocks.PROCESSING_CHAMBER_ID,
             BlockEntityType.Builder.of(
                 { pos, state ->
                     val c = ProcessingChamberConfig.normal
-                    CapsuleBlockEntity(ModBlockEntities.CAPSULE_BLOCK_ENTITY, pos, state, c.energyPerTick, c.processTime, c.outputAmount)
+                    CapsuleBlockEntity(
+                        ModBlockEntities.CAPSULE_BLOCK_ENTITY,
+                        pos,
+                        state,
+                        c.maxEnergy,
+                        c.energyPerTick,
+                        c.processTime,
+                        c.outputAmount,
+                        c.upgradeSlots,
+                        c.minProcessTime,
+                        c.fortuneBonusChance,
+                    )
                 },
                 PROCESSING_CHAMBER,
             ).build(null),
@@ -86,7 +130,18 @@ object ProcessingChamberFabricRegistries {
             BlockEntityType.Builder.of(
                 { pos, state ->
                     val c = ProcessingChamberConfig.advanced
-                    CapsuleBlockEntity(ModBlockEntities.ADVANCED_CAPSULE_BLOCK_ENTITY, pos, state, c.energyPerTick, c.processTime, c.outputAmount)
+                    CapsuleBlockEntity(
+                        ModBlockEntities.ADVANCED_CAPSULE_BLOCK_ENTITY,
+                        pos,
+                        state,
+                        c.maxEnergy,
+                        c.energyPerTick,
+                        c.processTime,
+                        c.outputAmount,
+                        c.upgradeSlots,
+                        c.minProcessTime,
+                        c.fortuneBonusChance,
+                    )
                 },
                 ADVANCED_PROCESSING_CHAMBER,
             ).build(null),

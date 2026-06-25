@@ -7,6 +7,7 @@ import net.minecraft.core.Direction
 import net.minecraft.world.Containers
 import net.minecraft.world.ItemInteractionResult
 import net.minecraft.world.InteractionResult
+import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.context.BlockPlaceContext
@@ -101,6 +102,32 @@ class AdvancedProcessingChamberBlock(properties: Properties) : BaseEntityBlock(p
         super.onRemove(state, level, pos, newState, movedByPiston)
     }
 
+    override fun playerDestroy(
+        level: Level,
+        player: Player,
+        pos: BlockPos,
+        state: BlockState,
+        blockEntity: BlockEntity?,
+        tool: ItemStack,
+    ) {
+        if (!level.isClientSide && !player.abilities.instabuild) {
+            val stack = ItemStack(this)
+            (blockEntity as? CapsuleBlockEntity)?.saveEnergyToStack(stack)
+            popResource(level, pos, stack)
+        }
+    }
+
+    override fun setPlacedBy(
+        level: Level,
+        pos: BlockPos,
+        state: BlockState,
+        placer: LivingEntity?,
+        stack: ItemStack,
+    ) {
+        super.setPlacedBy(level, pos, state, placer, stack)
+        (level.getBlockEntity(pos) as? CapsuleBlockEntity)?.loadEnergyFromStack(stack)
+    }
+
     override fun useItemOn(
         stack: ItemStack,
         state: BlockState,
@@ -127,13 +154,8 @@ class AdvancedProcessingChamberBlock(properties: Properties) : BaseEntityBlock(p
         hit: BlockHitResult,
     ): InteractionResult {
         val be = level.getBlockEntity(pos) as? CapsuleBlockEntity ?: return InteractionResult.PASS
-        val seed = be.getItem(0)
-        if (seed.isEmpty) return InteractionResult.PASS
         if (level.isClientSide) return InteractionResult.SUCCESS
-        be.setItem(0, ItemStack.EMPTY)
-        if (!player.addItem(seed)) {
-            player.drop(seed, false)
-        }
+        player.openMenu(be)
         return InteractionResult.SUCCESS
     }
 

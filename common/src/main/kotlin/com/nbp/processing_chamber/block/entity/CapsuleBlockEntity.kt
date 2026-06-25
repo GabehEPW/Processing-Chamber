@@ -1,9 +1,14 @@
 package com.nbp.processing_chamber.block.entity
 
+import com.nbp.processing_chamber.block.AdvancedProcessingChamberBlock
+import com.nbp.processing_chamber.menu.ProcessingChamberMenu
+import com.nbp.processing_chamber.config.ProcessingChamberConfig
+import com.nbp.processing_chamber.registry.ProcessingChamberItems
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.HolderLookup
 import net.minecraft.core.NonNullList
+import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
@@ -12,24 +17,52 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.ContainerHelper
 import net.minecraft.world.WorldlyContainer
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.network.chat.Component
+import net.minecraft.world.MenuProvider
+import net.minecraft.world.entity.player.Inventory
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.inventory.ContainerData
+import net.minecraft.world.item.component.CustomData
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
+import kotlin.math.roundToInt
 
 class CapsuleBlockEntity(
     type: BlockEntityType<*>,
     pos: BlockPos,
     state: BlockState,
-    val energyPerTick: Int = 50,
-    val processTime: Int = 100,
+    val capacity: Int = 5000,
+    val energyPerTick: Int = 15,
+    val processTime: Int = 1800,
     val outputAmount: Int = 1,
-) : BlockEntity(type, pos, state), WorldlyContainer {
+    val upgradeSlotCount: Int = 1,
+    val minProcessTime: Int = 1200,
+    val fortuneBonusChance: Float = 0.15f,
+) : BlockEntity(type, pos, state), WorldlyContainer, MenuProvider {
 
-    val capacity: Int = energyPerTick * 4
-    val maxReceive: Int = energyPerTick * 4
+    val maxReceive: Int = capacity
 
     companion object {
+        const val SLOT_INPUT = 0
+        const val SLOT_OUTPUT_START = 1
+        const val SLOT_OUTPUT_END = 9
+        const val SLOT_UPGRADE_START = 10
+        const val SLOT_UPGRADE_END = 12
+        const val MAX_UPGRADE_SLOTS = 3
+        const val CONTAINER_SIZE = 13
+
+        const val DATA_ENERGY = 0
+        const val DATA_CAPACITY = 1
+        const val DATA_PROGRESS = 2
+        const val DATA_PROCESS_TIME = 3
+        const val DATA_ENERGY_PER_TICK = 4
+        const val DATA_FORTUNE_CHANCE_PERCENT = 5
+        const val DATA_COUNT = 6
+        private const val STACK_ENERGY_KEY = "processing_chamber_energy"
+
         private val ITEM_MAP = buildMap<String, String> {
             // Apricorn seeds → apricorns
             put("cobblemon:black_apricorn_seed", "cobblemon:black_apricorn")
@@ -126,12 +159,58 @@ class CapsuleBlockEntity(
             val id = BuiltInRegistries.ITEM.getKey(stack.item)?.toString() ?: return false
             return id in ITEM_MAP
         }
+
+        fun isValidUpgrade(stack: ItemStack): Boolean {
+            val id = BuiltInRegistries.ITEM.getKey(stack.item)?.toString() ?: return false
+            return id == ProcessingChamberItems.OVERCLOCK_CARD_ID.toString() ||
+                id == ProcessingChamberItems.FORTUNE_CARD_ID.toString() ||
+                id == ProcessingChamberItems.OPTIMIZATION_CARD_ID.toString()
+        }
+
+        fun isUpgradeSlot(slot: Int): Boolean = slot in SLOT_UPGRADE_START..SLOT_UPGRADE_END
+
+        val OUTPUT_SLOTS: IntArray = IntArray(SLOT_OUTPUT_END - SLOT_OUTPUT_START + 1) {
+            SLOT_OUTPUT_START + it
+        }
     }
 
     var energy: Int = 0
         private set
     var processProgress: Int = 0
-    private val items = NonNullList.withSize(2, ItemStack.EMPTY)
+    private val items = NonNullList.withSize(CONTAINER_SIZE, ItemStack.EMPTY)
+    private val menuData = object : ContainerData {
+        override fun get(index: Int): Int {
+            return when (index) {
+                DATA_ENERGY -> energy
+                DATA_CAPACITY -> capacity
+                DATA_PROGRESS -> processProgress
+                DATA_PROCESS_TIME -> getModifiedMaxProgress()
+                DATA_ENERGY_PER_TICK -> getModifiedEnergyPerTick()
+                DATA_FORTUNE_CHANCE_PERCENT -> (getBonusOutputChance() * 100.0f).roundToInt()
+                else -> 0
+            }
+        }
+
+        override fun set(index: Int, value: Int) {
+            when (index) {
+                DATA_ENERGY -> energy = value
+                DATA_PROGRESS -> processProgress = value
+            }
+        }
+
+        override fun getCount(): Int = DATA_COUNT
+    }
+
+    override fun getDisplayName(): Component =
+        if (blockState.block is AdvancedProcessingChamberBlock) {
+            Component.translatable("container.processing_chamber.advanced_resource_processor")
+        } else {
+            Component.translatable("container.processing_chamber.resource_processor")
+        }
+
+    override fun createMenu(containerId: Int, playerInventory: Inventory, player: Player): AbstractContainerMenu {
+        return ProcessingChamberMenu(containerId, playerInventory, this, menuData)
+    }
 
     fun receiveEnergy(maxReceive: Int, simulate: Boolean): Int {
         val accepted = minOf(maxReceive, capacity - energy, this.maxReceive)
@@ -144,50 +223,172 @@ class CapsuleBlockEntity(
 
     fun extractEnergy(maxExtract: Int, simulate: Boolean): Int = 0
 
+    fun saveEnergyToStack(stack: ItemStack) {
+        stack.remove(DataComponents.BLOCK_ENTITY_DATA)
+        if (energy <= 0) return
+        val tag = CompoundTag()
+        tag.putInt(STACK_ENERGY_KEY, energy.coerceIn(0, capacity))
+        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag))
+    }
+
+    fun loadEnergyFromStack(stack: ItemStack) {
+        stack.remove(DataComponents.BLOCK_ENTITY_DATA)
+        val data = stack.get(DataComponents.CUSTOM_DATA) ?: return
+        val tag = data.copyTag()
+        if (!tag.contains(STACK_ENERGY_KEY)) return
+        energy = tag.getInt(STACK_ENERGY_KEY).coerceIn(0, capacity)
+        setChanged()
+        syncToClient()
+    }
+
+    fun getActiveUpgradeSlotCount(): Int = upgradeSlotCount.coerceIn(0, MAX_UPGRADE_SLOTS)
+
+    fun isUpgradeSlotActive(slot: Int): Boolean =
+        isUpgradeSlot(slot) && slot < SLOT_UPGRADE_START + getActiveUpgradeSlotCount()
+
+    fun canInsertUpgrade(stack: ItemStack, slot: Int): Boolean {
+        if (!isUpgradeSlotActive(slot)) return false
+        if (!isValidUpgrade(stack)) return false
+        return !hasSameUpgradeInAnotherSlot(stack, slot)
+    }
+
+    private fun hasSameUpgradeInAnotherSlot(stack: ItemStack, slotToIgnore: Int): Boolean {
+        for (slot in SLOT_UPGRADE_START..SLOT_UPGRADE_END) {
+            if (slot == slotToIgnore) continue
+            val other = items[slot]
+            if (!other.isEmpty && ItemStack.isSameItemSameComponents(other, stack)) return true
+        }
+        return false
+    }
+
+    private fun hasUpgrade(id: ResourceLocation): Boolean {
+        for (slot in SLOT_UPGRADE_START until SLOT_UPGRADE_START + getActiveUpgradeSlotCount()) {
+            val stack = items[slot]
+            if (!stack.isEmpty && BuiltInRegistries.ITEM.getKey(stack.item)?.toString() == id.toString()) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun hasOverclockCard(): Boolean = hasUpgrade(ProcessingChamberItems.OVERCLOCK_CARD_ID)
+    fun hasOptimizationCard(): Boolean = hasUpgrade(ProcessingChamberItems.OPTIMIZATION_CARD_ID)
+    fun hasFortuneCard(): Boolean = hasUpgrade(ProcessingChamberItems.FORTUNE_CARD_ID)
+
+    fun getModifiedMaxProgress(): Int {
+        val baseTime = maxOf(minProcessTime, processTime, 1)
+        if (!hasOverclockCard()) return baseTime
+
+        val modifiedTime = baseTime * ProcessingChamberConfig.upgrades.overclockTimeMultiplier
+        return maxOf(modifiedTime.roundToInt(), 1)
+    }
+
+    fun getModifiedEnergyPerTick(): Int {
+        var value = energyPerTick.toFloat()
+        if (hasOverclockCard()) value *= ProcessingChamberConfig.upgrades.overclockEnergyMultiplier
+        if (hasOptimizationCard()) value *= ProcessingChamberConfig.upgrades.optimizationEnergyMultiplier
+        if (hasFortuneCard()) value *= ProcessingChamberConfig.upgrades.fortuneEnergyMultiplier
+        return maxOf(ProcessingChamberConfig.upgrades.minEnergyPerTick, value.roundToInt(), 0)
+    }
+
+    private fun getBonusOutputChance(): Float {
+        if (!hasFortuneCard()) return 0.0f
+        return fortuneBonusChance.coerceIn(0.0f, 1.0f)
+    }
+
     fun tick() {
         if (level == null || level!!.isClientSide) return
 
-        if (canProcess()) {
-            if (energy >= energyPerTick) {
-                energy -= energyPerTick
-                processProgress++
-                setChanged()
+        transferOutputsDown()
 
-                if (processProgress >= processTime) {
-                    process()
+        if (!hasValidRecipe() || !hasOutputSpace()) {
+            if (processProgress > 0) {
+                processProgress = 0
+                setChanged()
+            }
+            return
+        }
+
+        val energyCost = getModifiedEnergyPerTick()
+        if (energy >= energyCost) {
+            energy -= energyCost
+            processProgress++
+            setChanged()
+
+            if (processProgress >= getModifiedMaxProgress()) {
+                if (process()) {
                     processProgress = 0
                     syncToClient()
                 }
             }
-        } else if (processProgress > 0) {
-            processProgress = 0
-            setChanged()
         }
     }
 
-    private fun canProcess(): Boolean {
+    private fun hasValidRecipe(): Boolean {
         val input = items[0]
         if (input.isEmpty) return false
         val result = getResult(input)
-        if (result.isEmpty) return false
-
-        val output = items[1]
-        if (output.isEmpty) return true
-        return ItemStack.isSameItemSameComponents(output, result) &&
-            output.count + result.count <= output.maxStackSize
+        return !result.isEmpty
     }
 
-    private fun process() {
+    private fun hasOutputSpace(): Boolean {
+        val result = getResult(items[SLOT_INPUT])
+        return !result.isEmpty && findOutputSlot(result) != -1
+    }
+
+    private fun process(): Boolean {
         val input = items[0]
         val result = getResult(input)
-        if (result.isEmpty) return
+        if (result.isEmpty) return false
 
-        val output = items[1]
+        val outputSlot = findOutputSlot(result)
+        if (outputSlot == -1) return false
+
+        val output = items[outputSlot]
         if (output.isEmpty) {
-            items[1] = result.copy()
+            items[outputSlot] = result.copy()
         } else {
             output.grow(result.count)
         }
+
+        tryProcessBonusOutput(result)
+        setChanged()
+        return true
+    }
+
+    private fun tryProcessBonusOutput(result: ItemStack) {
+        val chance = getBonusOutputChance()
+        val currentLevel = level ?: return
+        if (chance <= 0.0f || currentLevel.random.nextFloat() >= chance) return
+
+        val bonus = result.copy()
+        bonus.count = 1
+        val outputSlot = findOutputSlot(bonus)
+        if (outputSlot == -1) return
+
+        val output = items[outputSlot]
+        if (output.isEmpty) {
+            items[outputSlot] = bonus
+        } else {
+            output.grow(1)
+        }
+    }
+
+    private fun findOutputSlot(result: ItemStack): Int {
+        for (slot in SLOT_OUTPUT_START..SLOT_OUTPUT_END) {
+            val output = items[slot]
+            if (ItemStack.isSameItemSameComponents(output, result) &&
+                output.count + result.count <= output.maxStackSize
+            ) {
+                return slot
+            }
+        }
+
+        for (slot in SLOT_OUTPUT_START..SLOT_OUTPUT_END) {
+            if (items[slot].isEmpty) return slot
+        }
+
+        return -1
     }
 
     private fun getResult(input: ItemStack): ItemStack {
@@ -198,9 +399,66 @@ class CapsuleBlockEntity(
         return ItemStack(item, outputAmount)
     }
 
+    private fun transferOutputsDown(): Boolean {
+        val target = level?.getBlockEntity(worldPosition.below()) as? CapsuleBlockEntity ?: return false
+        var movedAny = false
+
+        for (slot in SLOT_OUTPUT_START..SLOT_OUTPUT_END) {
+            val source = items[slot]
+            if (source.isEmpty) continue
+
+            if (target.acceptOutput(source) > 0) {
+                movedAny = true
+                if (source.isEmpty) {
+                    items[slot] = ItemStack.EMPTY
+                }
+            }
+        }
+
+        if (movedAny) {
+            setChanged()
+            target.setChanged()
+            syncToClient()
+            target.syncToClient()
+        }
+
+        return movedAny
+    }
+
+    private fun acceptOutput(source: ItemStack): Int {
+        var moved = 0
+
+        for (slot in SLOT_OUTPUT_START..SLOT_OUTPUT_END) {
+            val target = items[slot]
+            if (!ItemStack.isSameItemSameComponents(target, source)) continue
+
+            val amount = minOf(source.count, target.maxStackSize - target.count)
+            if (amount <= 0) continue
+
+            target.grow(amount)
+            source.shrink(amount)
+            moved += amount
+            if (source.isEmpty) return moved
+        }
+
+        for (slot in SLOT_OUTPUT_START..SLOT_OUTPUT_END) {
+            if (!items[slot].isEmpty) continue
+
+            val amount = minOf(source.count, source.maxStackSize)
+            val inserted = source.copy()
+            inserted.count = amount
+            items[slot] = inserted
+            source.shrink(amount)
+            moved += amount
+            if (source.isEmpty) return moved
+        }
+
+        return moved
+    }
+
     // --- WorldlyContainer ---
 
-    override fun getContainerSize(): Int = 2
+    override fun getContainerSize(): Int = CONTAINER_SIZE
     override fun isEmpty(): Boolean = items.all { it.isEmpty }
     override fun getItem(slot: Int): ItemStack = items[slot]
     override fun removeItem(slot: Int, amount: Int): ItemStack {
@@ -210,7 +468,19 @@ class CapsuleBlockEntity(
     }
     override fun removeItemNoUpdate(slot: Int): ItemStack = ContainerHelper.takeItem(items, slot)
     override fun setItem(slot: Int, stack: ItemStack) {
-        items[slot] = stack
+        if (isUpgradeSlot(slot)) {
+            if (stack.isEmpty) {
+                items[slot] = ItemStack.EMPTY
+            } else if (canInsertUpgrade(stack, slot)) {
+                val single = stack.copy()
+                single.count = 1
+                items[slot] = single
+            } else {
+                return
+            }
+        } else {
+            items[slot] = stack
+        }
         if (stack.count > maxStackSize) stack.count = maxStackSize
         setChanged()
         syncToClient()
@@ -232,20 +502,21 @@ class CapsuleBlockEntity(
             worldPosition.x + 0.5, worldPosition.y + 0.5, worldPosition.z + 0.5
         ) <= 64.0
     override fun clearContent() = items.fill(ItemStack.EMPTY)
-    override fun getSlotsForFace(side: Direction?): IntArray = intArrayOf(0, 1)
+    override fun getSlotsForFace(side: Direction?): IntArray {
+        return if (side == Direction.DOWN) OUTPUT_SLOTS else intArrayOf(SLOT_INPUT)
+    }
+
     override fun canPlaceItemThroughFace(slot: Int, stack: ItemStack, side: Direction?): Boolean {
-        if (slot != 0 || side != Direction.UP) return false
+        if (slot != SLOT_INPUT || side != Direction.UP) return false
         if (!getItem(0).isEmpty) return false
         if (!isValidSeed(stack)) return false
         val result = getResult(stack)
         if (result.isEmpty) return false
-        val output = getItem(1)
-        if (output.isEmpty) return true
-        return ItemStack.isSameItemSameComponents(output, result) &&
-            output.count + result.count <= output.maxStackSize
+        return findOutputSlot(result) != -1
     }
+
     override fun canTakeItemThroughFace(slot: Int, stack: ItemStack, side: Direction?): Boolean =
-        slot == 1 && side == Direction.DOWN
+        slot in SLOT_OUTPUT_START..SLOT_OUTPUT_END && side == Direction.DOWN
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)
@@ -256,10 +527,10 @@ class CapsuleBlockEntity(
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.loadAdditional(tag, registries)
-        energy = tag.getInt("energy")
-        processProgress = tag.getInt("progress")
+        energy = tag.getInt("energy").coerceIn(0, capacity)
         items.fill(ItemStack.EMPTY)
         ContainerHelper.loadAllItems(tag, items, registries)
+        processProgress = tag.getInt("progress").coerceIn(0, getModifiedMaxProgress())
     }
 
     fun loadData(tag: CompoundTag, registries: HolderLookup.Provider) {

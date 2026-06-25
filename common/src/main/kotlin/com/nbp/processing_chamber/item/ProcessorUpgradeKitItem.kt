@@ -3,12 +3,33 @@ package com.nbp.processing_chamber.item
 import com.nbp.processing_chamber.block.ProcessingChamberBlock
 import com.nbp.processing_chamber.block.entity.CapsuleBlockEntity
 import com.nbp.processing_chamber.registry.ProcessingChamberBlocks
+import net.minecraft.ChatFormatting
 import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.network.chat.Component
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.item.context.UseOnContext
 
-class UpgradeItem(properties: Properties) : Item(properties) {
+class ProcessorUpgradeKitItem(properties: Properties) : Item(properties) {
+    override fun appendHoverText(
+        stack: ItemStack,
+        context: Item.TooltipContext,
+        tooltipComponents: MutableList<Component>,
+        tooltipFlag: TooltipFlag,
+    ) {
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag)
+        tooltipComponents.add(
+            Component.translatable("tooltip.processing_chamber.processor_upgrade_kit.description")
+                .withStyle(ChatFormatting.GRAY),
+        )
+        tooltipComponents.add(
+            Component.translatable("tooltip.processing_chamber.processor_upgrade_kit.preserve")
+                .withStyle(ChatFormatting.GRAY),
+        )
+    }
+
     override fun useOn(context: UseOnContext): InteractionResult {
         val player = context.player ?: return InteractionResult.PASS
         val level = context.level

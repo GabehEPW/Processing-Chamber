@@ -16,10 +16,10 @@
       "item": "minecraft:quartz"
     },
     "p": {
-      "item": "processing_chamber:processing_chamber"
+      "item": "processing_chamber:resource_processor"
     }
   },
   "result": {
-    "id": "processing_chamber:advanced_processing_chamber"
+    "id": "processing_chamber:advanced_resource_processor"
   }
 }

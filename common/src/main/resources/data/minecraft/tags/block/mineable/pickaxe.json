@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "processing_chamber:processing_chamber",
-    "processing_chamber:advanced_processing_chamber"
+    "processing_chamber:resource_processor",
+    "processing_chamber:advanced_resource_processor"
   ]
 }
